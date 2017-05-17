@@ -4,6 +4,7 @@ import Home from '../home/Home.jsx';
 import Profile from '../profile/Profile.jsx';
 import Login from '../login/Login.jsx';
 import Header from '../header/Header.jsx';
+import Sidebar from '../sidebar/Sidebar.jsx';
 import Footer from '../footer/Footer.jsx';
 
 
@@ -14,6 +15,7 @@ class App extends Component {
     return (
       <main className="App">
         <Header/>
+        <Sidebar/>
         <Switch>
           <Route exact path='/' component={Home}/>
           <Route path='/login' component={Login}/>
