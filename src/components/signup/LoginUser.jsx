@@ -1,8 +1,8 @@
 import React from 'react'
 import { withRouter } from 'react-router'
-import { graphql } from 'react-apollo'
-import gql from 'graphql-tag'
+import { graphql, compose } from 'react-apollo'
 import PropTypes from 'prop-types';
+import {signinUser, userQuery} from '../../actions/user';
 
 class LoginUser extends React.Component {
 
@@ -16,16 +16,29 @@ class LoginUser extends React.Component {
     password: '',
   }
 
-  render () {
-    if (this.props.data.loading) {
-      return (<div>Loading</div>)
-    }
+  signinUser = () => {
 
-    // redirect if user is logged in
-    if (this.props.data.user) {
-      console.warn('already logged in')
-      //this.props.router.replace('/')
-    }
+    const {email, password} = this.state
+
+    this.props.signinUser({
+      variables: { email, password },
+      optimisticResponse: {},
+      update: (store, { data: { signinUser } }) => {
+        const data = store.readQuery({ query: userQuery });
+        data.user = data;
+        store.writeQuery({ query: userQuery, data});
+      },
+    })
+      .then((response) => {
+        window.localStorage.setItem('graphcoolToken', response.data.signinUser.token)
+        //this.props.router.replace('/')
+      }).catch((e) => {
+        console.error(e)
+        //this.props.router.replace('/')
+      })
+  }
+
+  render () {
 
     return (
       <div className=''>
@@ -52,37 +65,8 @@ class LoginUser extends React.Component {
       </div>
     )
   }
-
-  signinUser = () => {
-    const {email, password} = this.state
-
-    this.props.signinUser({variables: {email, password}})
-      .then((response) => {
-        window.localStorage.setItem('graphcoolToken', response.data.signinUser.token)
-        //this.props.router.replace('/')
-      }).catch((e) => {
-        console.error(e)
-        //this.props.router.replace('/')
-      })
-  }
 }
 
-const signinUser = gql`
-  mutation ($email: String!, $password: String!) { 
-    signinUser(email: {email: $email, password: $password}) {
-      token
-    }
-  }
-`
-
-const userQuery = gql`
-  query {
-    user {
-      id
-    }
-  }
-`
-
-export default graphql(signinUser, {name: 'signinUser'})(
-  graphql(userQuery, { options: { fetchPolicy: 'network-only' }})(withRouter(LoginUser))
-)
+export default compose(
+  graphql(signinUser, { name: 'signinUser' }),
+)(withRouter(LoginUser));

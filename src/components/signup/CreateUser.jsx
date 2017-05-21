@@ -1,8 +1,8 @@
 import React from 'react';
 import { withRouter } from 'react-router';
 import { graphql } from 'react-apollo';
-import gql from 'graphql-tag';
 import PropTypes from 'prop-types';
+import {createUser, userQuery, signinUser} from '../../actions/user';
 
 class CreateUser extends React.Component {
 
@@ -81,30 +81,6 @@ class CreateUser extends React.Component {
       })
   }
 }
-
-const createUser = gql`
-  mutation ($email: String!, $password: String!, $username: String!) {
-    createUser(authProvider: {email: {email: $email, password: $password}}, username: $username) {
-      id
-    }
-  }
-`
-
-const signinUser = gql`
-  mutation ($email: String!, $password: String!) {
-    signinUser(email: {email: $email, password: $password}) {
-      token
-    }
-  }
-`
-
-const userQuery = gql`
-  query {
-    user {
-      id
-    }
-  }
-`
 
 export default graphql(createUser, {name: 'createUser'})(
   graphql(userQuery, { options: { fetchPolicy: 'network-only' }})(
